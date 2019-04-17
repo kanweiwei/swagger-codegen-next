@@ -1,0 +1,28 @@
+{
+  "name": "fetchapi",
+  "version": "1.0.0",
+  "description": "根据swagger.json生成api文件",
+  "main": "./lib/index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel src/ -d lib/"
+  },
+  "author": "kanweiwei",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-cli": "6.26.0",
+    "babel-plugin-syntax-async-functions": "6.13.0",
+    "babel-preset-flow": "6.23.0",
+    "flow-bin": "0.97.0"
+  },
+  "dependencies": {
+    "bluebird": "3.5.4",
+    "lodash": "^4.17.11",
+    "prettier": "1.17.0",
+    "query-string": "^6.4.2",
+    "rimraf": "^2.6.3"
+  }
+}

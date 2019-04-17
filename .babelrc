@@ -1,0 +1,8 @@
+{
+    "presets": [
+        "flow"
+    ],
+    "plugins": [
+        "syntax-async-functions"
+    ]
+}
