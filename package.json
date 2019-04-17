@@ -1,7 +1,8 @@
 {
-  "name": "fetchapi",
-  "version": "1.0.0",
+  "name": "fetch-api",
+  "version": "0.0.1",
   "description": "根据swagger.json生成api文件",
+  "keywords": ["swagger", "typescript"],
   "main": "./lib/index.js",
   "directories": {
     "lib": "lib"
@@ -12,6 +13,10 @@
   },
   "author": "kanweiwei",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kanweiwei/fetch-api"
+  },
   "devDependencies": {
     "babel-cli": "6.26.0",
     "babel-plugin-syntax-async-functions": "6.13.0",
@@ -19,7 +24,7 @@
     "flow-bin": "0.97.0"
   },
   "dependencies": {
-    "bluebird": "3.5.4",
+    "bluebird": "3.5.4",    
     "lodash": "^4.17.11",
     "prettier": "1.17.0",
     "query-string": "^6.4.2",
