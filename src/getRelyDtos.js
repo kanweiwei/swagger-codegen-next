@@ -1,7 +1,8 @@
+// @flow
 
 const dataTypes = require("./dataTypes");
 
-function getRelyDtos({ properties, required }: { properties: any[]; required: string[] }, commonDtos: any[], dtos: any[]) {
+function getRelyDtos({ properties, required }: { properties: any; required: string[] }, commonDtos: any[], dtos: any[]) {
     let relys: string[] = [];
     Object.keys(properties).forEach(p => {
         let type = dataTypes[properties[p].type];
