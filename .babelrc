@@ -1,4 +1,7 @@
 {
-  "presets": ["flow", "es2015"],
-  "plugins": ["syntax-async-functions"]
+  "presets": ["@babel/preset-typescript"],
+  "plugins": [
+    "@babel/plugin-syntax-async-generators",
+    "@babel/plugin-transform-modules-commonjs"
+  ]
 }

@@ -1,9 +1,8 @@
 // @flow
-const dataTypes = require("./dataTypes");
+import dataTypes from "./dataTypes"
 
 function getProperties(
   { properties, required }: { properties: any, required?: string[] },
-  commonDtos: any[]
 ) {
   let res: string = "";
   Object.keys(properties).forEach(p => {
@@ -35,4 +34,5 @@ function getProperties(
   return res;
 }
 
-module.exports = getProperties;
+export default getProperties
+

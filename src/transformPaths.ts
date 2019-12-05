@@ -1,5 +1,5 @@
 const { keys, first, assign } = require("lodash");
-function transformPaths(paths) {
+export default function transformPaths(paths) {
   var apiUrls = keys(paths);
   apiUrls.forEach(api => {
     let path = paths[api];
@@ -10,5 +10,3 @@ function transformPaths(paths) {
   });
   return paths;
 }
-
-exports.transformPaths = transformPaths;

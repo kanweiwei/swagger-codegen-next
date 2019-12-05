@@ -18,7 +18,7 @@ export interface Parameter {
 }
 
 export interface PathItem {
-  httpType: "post" | "delete" | "get" | "put";
+  httpType: Method;
   tags: string[];
   operationId: string;
   consumes: string[];
@@ -28,7 +28,7 @@ export interface PathItem {
 
 export type ApiUrl = string;
 export interface Paths {
-  [x: ApiUrl]: PathItem;
+  [x: string]: PathItem;
 }
 
 export interface DtoProperty {

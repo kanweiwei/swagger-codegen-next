@@ -1,4 +1,4 @@
-import type { PathItem } from "./interface";
+import  { PathItem, Paths, ApiUrl } from "./interface";
 
 function getMethodType(paths: Paths, pathName: ApiUrl) {
   const path: PathItem = paths[pathName];
@@ -6,4 +6,4 @@ function getMethodType(paths: Paths, pathName: ApiUrl) {
   return method;
 }
 
-exports.getMethodType = getMethodType;
+export default getMethodType

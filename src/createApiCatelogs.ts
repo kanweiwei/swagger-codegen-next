@@ -1,23 +1,27 @@
 // @flow
-import type { Swagger, Paths, ApiUrl } from "./interface";
+import { Swagger, ApiUrl } from "./interface";
 
 const fs = require("fs");
 const path = require("path");
-const groupBy = require("lodash/groupBy");
-const Promise = require("bluebird");
-const rimrafAynsc = Promise.promisify(require("rimraf"));
-const mkdirAsync = Promise.promisify(fs.mkdir);
-const writeFileAsync = Promise.promisify(fs.writeFile);
+const PromiseA = require("bluebird");
+const rimrafAynsc = PromiseA.promisify(require("rimraf"));
+const mkdirAsync = PromiseA.promisify(fs.mkdir);
+const writeFileAsync = PromiseA.promisify(fs.writeFile);
 const cwd = process.cwd();
-const lowerCase = require("./lowerCase");
 const prettier = require("prettier");
-const dataTypes = require("./dataTypes");
 
-const getProperties = require("./getProperties");
-const getRelyDtos = require("./getRelyDtos");
-const getMethodBody = require("./getMethodBody");
-const { transformPaths } = require("./transformPaths");
-const { flatten, flattenDeep, flow, uniq, first, keys } = require("lodash");
+import getProperties from "./getProperties";
+import getRelyDtos from "./getRelyDtos";
+import transformPaths from "./transformPaths";
+import {
+  flattenDeep,
+  flow,
+  uniq,
+  first,
+  keys,
+  lowerCase,
+  groupBy
+} from "lodash-es";
 
 function getChildModules(childs) {
   let res = "";
@@ -84,9 +88,9 @@ const createApiCatelogs = async (json: Swagger) => {
   await mkdirAsync(distPath);
 
   let modules: {
-    moduleName: string,
-    path: string,
-    children: any[]
+    moduleName: string;
+    path: string;
+    children: any[];
   }[] = [];
   moduleNames.forEach((moduleName, i) => {
     modules[i] = {
@@ -114,11 +118,11 @@ const createApiCatelogs = async (json: Swagger) => {
 
   // 整理dto 引用
   let dtos: {
-    name: string,
+    name: string;
     links: {
-      moduleName: string,
-      fns: string[]
-    }[]
+      moduleName: string;
+      fns: string[];
+    }[];
   }[] = keys(json.definitions).map(dtoName => {
     return {
       name: dtoName,
@@ -168,15 +172,15 @@ const createApiCatelogs = async (json: Swagger) => {
     .map(n => n.name);
   for (let i = 0; i < commonDtos.length; i++) {
     let d: {
-      required?: string[],
-      type: "object",
-      properties: any
+      required?: string[];
+      type: "object";
+      properties: any;
     } = json.definitions[commonDtos[i]];
     let s = "";
     if (!d.properties) {
       console.log(commonDtos[i], d);
     }
-    const relyDtos: any = getRelyDtos(d, commonDtos);
+    const relyDtos: any = getRelyDtos(d);
     relyDtos.forEach(d => {
       if (commonDtos.indexOf(d) > -1) {
         s += `
@@ -188,7 +192,7 @@ const createApiCatelogs = async (json: Swagger) => {
     });
     s += `
             interface ${commonDtos[i]} {
-                ${getProperties(d, commonDtos)}
+                ${getProperties(d)}
             }
 
             export default ${commonDtos[i]}
@@ -235,4 +239,5 @@ const createApiCatelogs = async (json: Swagger) => {
     );
   }
 };
-module.exports = createApiCatelogs;
+
+export default createApiCatelogs;

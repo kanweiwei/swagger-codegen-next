@@ -1,10 +1,9 @@
 // @flow
 
-const dataTypes = require("./dataTypes");
+import dataTypes from "./dataTypes"
 
 function getRelyDtos(
   { properties, required }: { properties: any, required?: string[] },
-  commonDtos: any[]
 ) {
   let relys: string[] = [];
   Object.keys(properties).forEach(p => {
@@ -23,5 +22,4 @@ function getRelyDtos(
   });
   return relys;
 }
-
-module.exports = getRelyDtos;
+export default getRelyDtos

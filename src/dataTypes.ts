@@ -1,4 +1,3 @@
-// @flow
 const dataTypes: any = {
     "string": "string",
     "boolean": "boolean",
@@ -6,4 +5,4 @@ const dataTypes: any = {
     "array": "[]",
 }
 
-module.exports = dataTypes;
+export default dataTypes
