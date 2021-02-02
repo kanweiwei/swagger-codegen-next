@@ -19,9 +19,9 @@ import {
   uniq,
   first,
   keys,
-  lowerCase,
+  camelCase,
   groupBy
-} from "lodash-es";
+} from "lodash";
 
 function getChildModules(childs) {
   let res = "";
@@ -29,7 +29,7 @@ function getChildModules(childs) {
     let parameters: any = groupBy(c.parameters, "in");
     let hasQuery = "query" in parameters;
     let hasBody = "body" in parameters;
-    let fnName = lowerCase(c.operationId);
+    let fnName = camelCase(c.operationId);
     if (hasBody && !hasQuery) {
       res += `
                 async ${fnName} (data: any) {
