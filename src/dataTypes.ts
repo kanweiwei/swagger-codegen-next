@@ -1,8 +1,10 @@
-const dataTypes: any = {
-    "string": "string",
-    "boolean": "boolean",
-    "integer": "number",
-    "array": "[]",
-}
+const dataTypes = {
+  string: "string",
+  boolean: "boolean",
+  integer: "number",
+  number: "number",
+  array: "[]",
+  object: "object",
+};
 
-export default dataTypes
+export default dataTypes;

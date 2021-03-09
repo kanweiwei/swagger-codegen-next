@@ -7,7 +7,7 @@
     "typescript"
   ],
   "main": "./lib/index.js",
-  "bin":"./bin/fetch-api.js",
+  "bin": "./bin/fetch-api.js",
   "directories": {
     "lib": "lib"
   },
@@ -27,7 +27,8 @@
     "@babel/plugin-syntax-async-generators": "^7.7.4",
     "@babel/plugin-transform-modules-commonjs": "^7.7.4",
     "@babel/preset-typescript": "^7.7.4",
-    "@types/lodash-es": "^4.17.3"
+    "@types/lodash-es": "^4.17.3",
+    "@types/prettier": "^2.2.2"
   },
   "dependencies": {
     "bluebird": "3.7.2",

@@ -28,11 +28,12 @@ export interface PathItem {
 
 export type ApiUrl = string;
 export interface Paths {
-  [x: string]: PathItem;
+  [x: string]: { [k in Method]: PathItem };
 }
 
 export interface DtoProperty {
-  format?: String;
+  $ref?: string;
+  format?: string;
   type?: DataTypes;
   enum?: number[];
   maximum?: Number;
@@ -41,14 +42,15 @@ export interface DtoProperty {
   uniqueItems?: Boolean;
   maxLength?: Number;
   items: {
-    $ref: String
+    $ref: string;
   };
 }
 
 export interface Dto {
+  required?: string[];
   type: "object";
   properties: {
-    [x: string]: DtoProperty
+    [propertyName: string]: DtoProperty;
   };
 }
 
