@@ -1,6 +1,9 @@
 import dataTypes from "./dataTypes";
 
-function getProperties(dtoName: string, { properties, required }: { properties: any; required?: string[] }) {
+function getProperties(
+  dtoName: string,
+  { properties, required }: { properties: any; required?: string[] }
+) {
   let res: string = "";
   Object.keys(properties).forEach((p) => {
     let isRequired: "" | "?" = (() => {
@@ -27,14 +30,16 @@ function getProperties(dtoName: string, { properties, required }: { properties: 
         if (dtoName.includes("[")) {
           type = "T[]";
         } else {
-          type = properties[p].items.$ref.match(/\#\/definitions\/([\w\[\]]*)/i)[1] + "[]";
+          type =
+            properties[p].items.$ref.match(/\#\/definitions\/([\w\[\]]*)/i)[1] +
+            "[]";
         }
       }
     }
     res += `
 
             /**
-             * @description ${description ?? ""}
+             * @description ${description ? description : ""}
              */
             ${p}${isRequired}: ${type};
 

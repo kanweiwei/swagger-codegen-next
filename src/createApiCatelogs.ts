@@ -1,16 +1,36 @@
 import PromiseA from "bluebird";
 import fs from "fs";
-import { camelCase, first, flattenDeep, flow, groupBy, keys, uniq } from "lodash";
+import {
+  camelCase,
+  first,
+  flattenDeep,
+  flow,
+  groupBy,
+  keys,
+  uniq,
+} from "lodash";
 import path from "path";
 import prettier from "prettier";
 import getProperties from "./getProperties";
 import { ApiUrl, Swagger } from "./interface";
 import SwaggerHelper from "./SwagggerHelper";
 
-const rimrafAynsc = PromiseA.promisify(require("rimraf"));
+const rimrafAync = PromiseA.promisify(require("rimraf"));
 const mkdirAsync = PromiseA.promisify(fs.mkdir);
 const writeFileAsync = PromiseA.promisify(fs.writeFile);
 const cwd = process.cwd();
+
+function useQueryString(childs) {
+  if (
+    childs.some((n) => {
+      let parameters: any = groupBy(n.parameters, "in");
+      return "query" in parameters;
+    })
+  ) {
+    return true;
+  }
+  return false;
+}
 
 function getChildModules(childs) {
   let res = "";
@@ -19,28 +39,39 @@ function getChildModules(childs) {
     let hasQuery = "query" in parameters;
     let hasBody = "body" in parameters;
     let fnName = camelCase(c.operationId);
+    const comment = `/**
+                      * @description ${c.summary}
+                      */ `;
+    if (c.summary) {
+      res += comment + "\n";
+    }
     if (hasBody && !hasQuery) {
-      res += `
-                static  async  ${fnName}(data: any) {
-                    return await http.${c.method}("${c.api}", data)
+      res += `static    ${fnName}(data: any) {
+                    return  http.${c.method}("${c.api}", data)
                 }
             `;
       return;
-    }
-    if (!hasBody && hasQuery) {
-      res += `
-                static async  ${fnName}(data: any) {
-                    return await http.${c.method}("${c.api}?" + queryString.stringify(data))
+    } else if (!hasBody && hasQuery) {
+      res += `static   ${fnName}(data: any) {
+                    return  http.${c.method}("${
+        c.api
+      }?" + queryString.stringify(data))
                 }
             `;
       return;
-    }
-    if (hasBody && hasQuery) {
-      res += `
-                static async ${fnName}(query: any, data: any) {
-                    return await http.${c.method}("${c.api}?" + queryString.stringify(query), data)
+    } else if (hasBody && hasQuery) {
+      res += `static  ${fnName}(query: any, data: any) {
+                    return  http.${c.method}("${
+        c.api
+      }?" + queryString.stringify(query), data)
                 }
             `;
+      return;
+    } else {
+      res += `static    ${fnName}() {
+                return  http.${c.method}("${c.api}")
+              }
+      `;
       return;
     }
   });
@@ -66,7 +97,8 @@ const createApiCatelogs = async (json: Swagger) => {
 
   const distPath = path.join(cwd, "./dist");
   // 清空dist目录
-  await rimrafAynsc(distPath);
+  // @ts-ignore
+  await rimrafAync(distPath);
   // 创建dist目录
   await mkdirAsync(distPath);
 
@@ -98,7 +130,10 @@ const createApiCatelogs = async (json: Swagger) => {
   // 整理dto 引用
   const dtoMap = SwaggerHelper.instance.getDtoMap();
 
-  await writeFileAsync(path.join(cwd, "dist/dtos.json"), Buffer.from(JSON.stringify(dtoMap)), "utf-8");
+  await writeFileAsync(
+    path.join(cwd, "dist/dtos.json"),
+    Buffer.from(JSON.stringify(dtoMap), "utf-8")
+  );
   // 创建通用的dto目录
   await mkdirAsync(path.join(cwd, "dist/dto"));
 
@@ -132,14 +167,22 @@ const createApiCatelogs = async (json: Swagger) => {
         `;
   }
   s = prettier.format(s, { semi: false, parser: "babel" });
-  await writeFileAsync(path.join(cwd, "dist/dto.ts"), Buffer.from(s), "utf-8");
+  await writeFileAsync(
+    path.join(cwd, "dist/dto.ts"),
+    Buffer.from(s, "utf-8"),
+    "utf-8"
+  );
 
   // 创建模块
   for (let i = 0, len = modules.length; i < len; i++) {
     await mkdirAsync(path.join(cwd, "dist", modules[i].moduleName));
     let s = `
             import http from "../http";
-            ${modules[i].children.some((c) => c.method === "get" || c.method === "delete") ? 'import queryString from "query-string"' : ""}
+            ${
+              useQueryString(modules[i].children)
+                ? 'import queryString from "query-string"'
+                : ""
+            }
 
             class ${modules[i].moduleName} {
                 ${getChildModules(modules[i].children)}
@@ -148,9 +191,13 @@ const createApiCatelogs = async (json: Swagger) => {
             export default  ${modules[i].moduleName};
         `;
     // TODO prettier config
-    s = prettier.format(s, { semi: false, parser: "babel" });
+    s = prettier.format(s, { semi: false, parser: "babel-ts" });
 
-    await writeFileAsync(path.join(modules[i].path, modules[i].moduleName + ".ts"), Buffer.from(s, "utf-8"));
+    await writeFileAsync(
+      path.join(modules[i].path, modules[i].moduleName + ".ts"),
+      Buffer.from(s, "utf-8"),
+      "utf-8"
+    );
   }
 };
 

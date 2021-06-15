@@ -1,5 +1,3 @@
-// @flow
-
 export type DataTypes = "string" | "boolean" | "integer" | "array";
 
 export type Method = "post" | "delete" | "put" | "get";
