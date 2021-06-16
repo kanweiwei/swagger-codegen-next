@@ -1,4 +1,4 @@
-import dataTypes from "./dataTypes";
+import dataTypes from "../core/dataTypes";
 
 function getProperties(
   dtoName: string,

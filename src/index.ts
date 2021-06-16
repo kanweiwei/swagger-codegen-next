@@ -1,7 +1,10 @@
 import { Swagger } from "./interface";
 import createApiCatelogs from "./createApiCatelogs";
+import SwaggerHelper from "./core/SwagggerHelper";
 
 module.exports = (json: Swagger) => {
-    // 创建api目录
-    createApiCatelogs(json);
-}
+  SwaggerHelper.instance.init(json);
+
+  // 创建api目录
+  createApiCatelogs(json);
+};

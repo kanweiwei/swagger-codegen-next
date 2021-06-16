@@ -15,18 +15,23 @@ export interface Parameter {
   default: string;
 }
 
+export type Produce = "text/plain" | "application/json" | "text/json";
 export interface PathItem {
   httpType: Method;
   tags: string[];
   operationId: string;
   consumes: string[];
-  produces: any[];
+  produces: Produce[];
   parameters: Parameter[];
 }
 
 export type ApiUrl = string;
 export interface Paths {
   [x: string]: { [k in Method]: PathItem };
+}
+
+export interface SwaggerPaths {
+  [x: string]: PathItem;
 }
 
 export interface DtoProperty {
@@ -57,6 +62,11 @@ export interface Dtos {
 }
 
 export interface Swagger {
+  swagger: string;
+  info: {
+    version: string;
+    title: string;
+  };
   paths: Paths;
   definitions: Dtos;
   [propName: string]: any;

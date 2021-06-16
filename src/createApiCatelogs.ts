@@ -1,4 +1,4 @@
-import PromiseA from "bluebird";
+import PromiseA, { resolve } from "bluebird";
 import fs from "fs";
 import {
   camelCase,
@@ -11,26 +11,21 @@ import {
 } from "lodash";
 import path from "path";
 import prettier from "prettier";
-import getProperties from "./getProperties";
+import getProperties from "./utils/getProperties";
 import { ApiUrl, Swagger } from "./interface";
-import SwaggerHelper from "./SwagggerHelper";
+import SwaggerHelper from "./core/SwagggerHelper";
+import writeFile from "./utils/writeFile";
+import useQueryString from "./utils/useQueryString";
 
 const rimrafAync = PromiseA.promisify(require("rimraf"));
 const mkdirAsync = PromiseA.promisify(fs.mkdir);
-const writeFileAsync = PromiseA.promisify(fs.writeFile);
 const cwd = process.cwd();
 
-function useQueryString(childs) {
-  if (
-    childs.some((n) => {
-      let parameters: any = groupBy(n.parameters, "in");
-      return "query" in parameters;
-    })
-  ) {
-    return true;
-  }
-  return false;
-}
+const defualtOptions = {
+  output: {
+    path: path.join(cwd, "./dist"),
+  },
+};
 
 function getChildModules(childs) {
   let res = "";
@@ -53,17 +48,13 @@ function getChildModules(childs) {
       return;
     } else if (!hasBody && hasQuery) {
       res += `static   ${fnName}(data: any) {
-                    return  http.${c.method}("${
-        c.api
-      }?" + queryString.stringify(data))
+                    return  http.${c.method}("${c.api}?" + queryString.stringify(data))
                 }
             `;
       return;
     } else if (hasBody && hasQuery) {
       res += `static  ${fnName}(query: any, data: any) {
-                    return  http.${c.method}("${
-        c.api
-      }?" + queryString.stringify(query), data)
+                    return  http.${c.method}("${c.api}?" + queryString.stringify(query), data)
                 }
             `;
       return;
@@ -78,13 +69,20 @@ function getChildModules(childs) {
   return res;
 }
 
+interface Options {
+  output?: {
+    path?: string;
+  };
+}
+
 /**
  * 创建dto和api文件
  * @param {*} json
  */
-const createApiCatelogs = async (json: Swagger) => {
-  SwaggerHelper.instance.setSwagger(json);
-  let paths = SwaggerHelper.instance.getTransformPaths();
+const createApiCatelogs = async (json: Swagger, options: Options = {}) => {
+  options = Object.assign({}, defualtOptions, options);
+
+  let paths = SwaggerHelper.instance.paths;
   const urls: ApiUrl[] = Object.keys(paths);
   let moduleNames: string[] = flow(
     flattenDeep,
@@ -95,12 +93,11 @@ const createApiCatelogs = async (json: Swagger) => {
     })
   );
 
-  const distPath = path.join(cwd, "./dist");
   // 清空dist目录
   // @ts-ignore
-  await rimrafAync(distPath);
+  await rimrafAync(options.output.path);
   // 创建dist目录
-  await mkdirAsync(distPath);
+  await mkdirAsync(options.output.path);
 
   let modules: {
     moduleName: string;
@@ -110,7 +107,7 @@ const createApiCatelogs = async (json: Swagger) => {
   moduleNames.forEach((moduleName, i) => {
     modules[i] = {
       moduleName: moduleName,
-      path: path.join(distPath, moduleName),
+      path: path.join(options.output.path, moduleName),
       children: [],
     };
     urls.forEach((apiUrl) => {
@@ -130,9 +127,12 @@ const createApiCatelogs = async (json: Swagger) => {
   // 整理dto 引用
   const dtoMap = SwaggerHelper.instance.getDtoMap();
 
-  await writeFileAsync(
+  await writeFile(
     path.join(cwd, "dist/dtos.json"),
-    Buffer.from(JSON.stringify(dtoMap), "utf-8")
+    Buffer.from(JSON.stringify(dtoMap)),
+    {
+      encoding: "utf-8",
+    }
   );
   // 创建通用的dto目录
   await mkdirAsync(path.join(cwd, "dist/dto"));
@@ -167,11 +167,22 @@ const createApiCatelogs = async (json: Swagger) => {
         `;
   }
   s = prettier.format(s, { semi: false, parser: "babel" });
-  await writeFileAsync(
-    path.join(cwd, "dist/dto.ts"),
-    Buffer.from(s, "utf-8"),
-    "utf-8"
-  );
+
+  await new Promise((resolve, reject) => {
+    fs.writeFile(
+      path.join(cwd, "dist/dto.ts"),
+      Buffer.from(s, "utf-8"),
+      {
+        encoding: "utf-8",
+      },
+      (err) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(null);
+      }
+    );
+  });
 
   // 创建模块
   for (let i = 0, len = modules.length; i < len; i++) {
@@ -193,10 +204,12 @@ const createApiCatelogs = async (json: Swagger) => {
     // TODO prettier config
     s = prettier.format(s, { semi: false, parser: "babel-ts" });
 
-    await writeFileAsync(
+    await writeFile(
       path.join(modules[i].path, modules[i].moduleName + ".ts"),
       Buffer.from(s, "utf-8"),
-      "utf-8"
+      {
+        encoding: "utf-8",
+      }
     );
   }
 };

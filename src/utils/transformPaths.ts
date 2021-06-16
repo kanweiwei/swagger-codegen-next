@@ -1,5 +1,5 @@
 import { first, keys } from "lodash";
-import { Method, PathItem, Paths } from "./interface";
+import { Method, PathItem, Paths } from "../interface";
 
 export default function transformPaths(paths: Paths) {
   const apiUrls = keys(paths);

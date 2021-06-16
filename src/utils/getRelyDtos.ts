@@ -1,7 +1,5 @@
-// @flow
-
-import dataTypes from "./dataTypes";
-import { Dto } from "./interface";
+import dataTypes from "../core/dataTypes";
+import { Dto } from "../interface";
 
 function getRelyDtos(dto: Dto) {
   const { properties } = dto;
@@ -14,7 +12,9 @@ function getRelyDtos(dto: Dto) {
     }
     if (type === "[]") {
       if ("$ref" in properties[p].items) {
-        relys.push(properties[p].items.$ref.match(/\#\/definitions\/([\w\[\]]*)/i)[1]);
+        relys.push(
+          properties[p].items.$ref.match(/\#\/definitions\/([\w\[\]]*)/i)[1]
+        );
       }
     }
   });
