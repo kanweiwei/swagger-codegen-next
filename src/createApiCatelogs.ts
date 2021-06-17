@@ -1,4 +1,4 @@
-import PromiseA, { resolve } from "bluebird";
+import PromiseA from "bluebird";
 import fs from "fs";
 import {
   camelCase,
@@ -7,19 +7,19 @@ import {
   flow,
   groupBy,
   keys,
-  uniq,
+  uniq
 } from "lodash";
 import path from "path";
 import prettier from "prettier";
-import getProperties from "./utils/getProperties";
-import { ApiUrl, Options, Parameter, PathItem, Swagger } from "./interface";
-import SwaggerHelper from "./core/SwagggerHelper";
-import writeFile from "./utils/writeFile";
-import useQueryString from "./utils/useQueryString";
-import { getDtos } from "./utils/getDtos";
-import { getDto } from "./utils/getDto";
-import getOutputDto from "./utils/getOutputDto";
 import dataTypes from "./core/dataTypes";
+import SwaggerHelper from "./core/SwagggerHelper";
+import { ApiUrl, Options, Parameter, PathItem, Swagger } from "./interface";
+import { getDto } from "./utils/getDto";
+import { getDtos } from "./utils/getDtos";
+import getOutputDto from "./utils/getOutputDto";
+import getProperties from "./utils/getProperties";
+import useQueryString from "./utils/useQueryString";
+import writeFile from "./utils/writeFile";
 
 const rimrafAync = PromiseA.promisify(require("rimraf"));
 const mkdirAsync = PromiseA.promisify(fs.mkdir);
@@ -174,7 +174,7 @@ const createApiCatelogs = async (json: Swagger, options: Options) => {
   const genericDtos = SwaggerHelper.instance.getGenericDtos();
   for (let i = 0; i < genericDtos.length; i++) {
     const definitionKeys = Object.keys(json.definitions);
-    const reg = new RegExp(`${genericDtos[i]}\[[a-zA-Z0-9]+\]`);
+    const reg = new RegExp(`${genericDtos[i]}\\[[a-zA-Z0-9]+\\]`);
     const targetDto = definitionKeys.find((n) => reg.exec(n));
     if (targetDto) {
       s += `

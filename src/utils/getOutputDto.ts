@@ -1,4 +1,3 @@
-import { isEmpty } from "lodash-es";
 import { PathItem } from "../interface";
 import { getType } from "./getProperties";
 

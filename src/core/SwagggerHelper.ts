@@ -1,12 +1,9 @@
-import { throws } from "assert/strict";
 import { first, keys, uniq } from "lodash";
 import {
   Dtos,
-  Method,
-  PathItem,
-  Paths,
+  Method, Paths,
   Swagger,
-  SwaggerPaths,
+  SwaggerPaths
 } from "../interface";
 
 interface DtoMap {
