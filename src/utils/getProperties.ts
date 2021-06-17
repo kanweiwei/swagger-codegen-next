@@ -13,7 +13,7 @@ export function getType(schema: DtoProperty) {
     if ("type" in schema.items) {
       type = dataTypes[schema.items.type] + "[]";
     } else if ("$ref" in schema.items) {
-      type = getDtoName(schema.items.$ref) +
+      type = getType(schema.items) +
           "[]";
     }
   }
