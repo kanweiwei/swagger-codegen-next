@@ -1,4 +1,4 @@
-<h1 align="center">Fetch Api</h1>
+<h1 align="center">Swagger Codegen Next</h1>
 
 generate .ts api files by swagger.json
 
