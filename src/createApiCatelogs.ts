@@ -19,6 +19,7 @@ import useQueryString from "./utils/useQueryString";
 import { getDtos } from "./utils/getDtos";
 import { getDto } from "./utils/getDto";
 import getOutputDto from "./utils/getOutputDto";
+import dataTypes from "./core/dataTypes";
 
 const rimrafAync = PromiseA.promisify(require("rimraf"));
 const mkdirAsync = PromiseA.promisify(fs.mkdir);
@@ -29,6 +30,20 @@ const defualtOptions = {
     path: path.join(cwd, "./dist"),
   },
 };
+
+
+function getQueryData(item: PathItem) {
+  let parameters: {
+    [k in "header" | "query" | "body"]?: Parameter[];
+  } = groupBy(item.parameters, "in");
+  if(!parameters.query) return  ;
+  let s = '{';
+  parameters.query.forEach(n => {
+    s += `${n.name}${n.required? '':'?'}:${dataTypes[n.type]};`
+  })
+  s+='}';
+  return s;
+}
 
 function getChildModules(childs: PathItem[]) {
   let res = "";
@@ -54,6 +69,8 @@ function getChildModules(childs: PathItem[]) {
     const outputDto = getOutputDto(c);
     const outputString = outputDto ? `<${outputDto}>` : "";
 
+    const queryData = getQueryData(c)
+
     if (hasBody && !hasQuery) {
       res += `static  ${fnName}(data: ${dto}) {
                     return  http.${c.httpType}${outputString}("${c.api}", data)
@@ -62,14 +79,14 @@ function getChildModules(childs: PathItem[]) {
             `;
       return;
     } else if (!hasBody && hasQuery) {
-      res += `static ${fnName}(data: any) {
+      res += `static ${fnName}(data: ${queryData}) {
                     return  http.${c.httpType}${outputString}("${c.api}?" + queryString.stringify(data))
                 }
 
             `;
       return;
     } else if (hasBody && hasQuery) {
-      res += `static ${fnName}(query: any, data: ${dto}) {
+      res += `static ${fnName}(query: ${queryData}, data: ${dto}) {
                     return  http.${c.httpType}${outputString}("${c.api}?" + queryString.stringify(query), data)
                 }
 
