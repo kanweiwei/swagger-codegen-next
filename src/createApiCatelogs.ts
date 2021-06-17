@@ -158,16 +158,6 @@ const createApiCatelogs = async (json: Swagger, options: Options) => {
   // 整理dto 引用
   const dtoMap = SwaggerHelper.instance.getDtoMap();
 
-  await writeFile(
-    path.join(outputPath, "./dtos.json"),
-    Buffer.from(JSON.stringify(dtoMap)),
-    {
-      encoding: "utf-8",
-    }
-  );
-  // 创建通用的dto目录
-  await mkdirAsync(path.join(outputPath, ".dto"));
-
   let s = "";
 
   // 泛型接口
