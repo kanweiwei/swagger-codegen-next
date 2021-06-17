@@ -1,4 +1,31 @@
 import dataTypes from "../core/dataTypes";
+import { DtoProperty } from "../interface";
+
+export function getType(schema: DtoProperty) {
+  let type = dataTypes[schema.type];
+  if (!type) {
+    // dto
+    if (schema.$ref) {
+      type = getDtoName(schema.$ref);
+    } 
+  }
+  if (type === "[]") {
+    if ("type" in schema.items) {
+      type = dataTypes[schema.items.type] + "[]";
+    } else if ("$ref" in schema.items) {
+      type = getDtoName(schema.items.$ref) +
+          "[]";
+    }
+  }
+  return type;
+}
+
+export function getDtoName(str: string) {
+  if(/\#\/definitions\/([\w\[\]]*)/i.exec(str)){
+    return RegExp.$1.replace('[','<').replace(']','>')
+  }
+  return ''
+}
 
 function getProperties(
   dtoName: string,

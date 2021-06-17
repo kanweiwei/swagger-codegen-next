@@ -1,7 +1,30 @@
 import { groupBy } from "lodash";
+import dataTypes from "../core/dataTypes";
 import SwaggerHelper from "../core/SwagggerHelper";
-import { PathItem, Parameter } from "../interface";
+import { PathItem, Parameter, Schema } from "../interface";
 import { getDto } from "./getDto";
+
+function getDtoListFromSchema(schema: Schema, list: string[]) {
+  if(schema.$ref) {
+    if (/#\/definitions\/([\w\[\]]*)/i.exec(schema.$ref)) {
+      if (RegExp.$1.includes("[")) {
+        let dtoNames = SwaggerHelper.instance.getDtosFromGenericDto(
+          RegExp.$1
+        );
+        list = [...list, ...dtoNames];
+      } else {
+        list.push(RegExp.$1);
+      }
+    }
+  }
+  if(dataTypes[schema.type]) {
+    if(dataTypes[schema.type] === '[]'){
+      const items = schema.items;
+      list = getDtoListFromSchema(items,list);
+    }
+  }
+  return list.filter(n => !['Object'].includes(n));
+}
 
 /**
  * 获取模块内涉及到 dto 名称
@@ -20,17 +43,9 @@ export function getDtos(childs: PathItem[]) {
       res.push(dto);
     }
     // output dto
-    if (c.responses["200"].schema && c.responses["200"].schema.$ref) {
-      if (/#\/definitions\/([\w\[\]]*)/i.exec(c.responses["200"].schema.$ref)) {
-        if (RegExp.$1.includes("[")) {
-          let dtoNames = SwaggerHelper.instance.getDtosFromGenericDto(
-            RegExp.$1
-          );
-          res = [...res, ...dtoNames];
-        } else {
-          res.push(RegExp.$1);
-        }
-      }
+    if (c.responses["200"].schema) {
+      res = getDtoListFromSchema(c.responses["200"].schema, res)
+      
     }
   });
   return res;

@@ -2,9 +2,7 @@ export type DataTypes = "string" | "boolean" | "integer" | "array";
 
 export type Method = "post" | "delete" | "put" | "get";
 
-export interface Schema {
-  $ref: string;
-}
+export interface Schema extends DtoProperty {}
 export interface Parameter {
   name: string;
   in: "query" | "body" | "header";
@@ -27,9 +25,7 @@ export interface PathItem {
   responses: {
     [x: string]: {
       description: string;
-      schema?: {
-        $ref: string;
-      };
+      schema?: Schema
     };
   };
   api?: string;
@@ -54,9 +50,7 @@ export interface DtoProperty {
   readOnly?: Boolean;
   uniqueItems?: Boolean;
   maxLength?: Number;
-  items: {
-    $ref: string;
-  };
+  items: Schema;
 }
 
 export interface Dto {
