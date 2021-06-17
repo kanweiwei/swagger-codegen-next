@@ -19,10 +19,20 @@ export type Produce = "text/plain" | "application/json" | "text/json";
 export interface PathItem {
   httpType: Method;
   tags: string[];
+  summary: string;
   operationId: string;
   consumes: string[];
   produces: Produce[];
   parameters: Parameter[];
+  responses: {
+    [x: string]: {
+      description: string;
+      schema?: {
+        $ref: string;
+      };
+    };
+  };
+  api?: string;
 }
 
 export type ApiUrl = string;
@@ -70,4 +80,13 @@ export interface Swagger {
   paths: Paths;
   definitions: Dtos;
   [propName: string]: any;
+}
+
+export interface Options {
+  output?: {
+    /**
+     * 输出目录的绝对路径
+     */
+    path?: string;
+  };
 }

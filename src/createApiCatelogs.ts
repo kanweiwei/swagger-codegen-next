@@ -12,10 +12,13 @@ import {
 import path from "path";
 import prettier from "prettier";
 import getProperties from "./utils/getProperties";
-import { ApiUrl, Swagger } from "./interface";
+import { ApiUrl, Options, Parameter, PathItem, Swagger } from "./interface";
 import SwaggerHelper from "./core/SwagggerHelper";
 import writeFile from "./utils/writeFile";
 import useQueryString from "./utils/useQueryString";
+import { getDtos } from "./utils/getDtos";
+import { getDto } from "./utils/getDto";
+import getOutputDto from "./utils/getOutputDto";
 
 const rimrafAync = PromiseA.promisify(require("rimraf"));
 const mkdirAsync = PromiseA.promisify(fs.mkdir);
@@ -27,41 +30,56 @@ const defualtOptions = {
   },
 };
 
-function getChildModules(childs) {
+function getChildModules(childs: PathItem[]) {
   let res = "";
   childs.forEach((c) => {
-    let parameters: any = groupBy(c.parameters, "in");
+    let parameters: {
+      [k in "header" | "query" | "body"]?: Parameter[];
+    } = groupBy(c.parameters, "in");
     let hasQuery = "query" in parameters;
     let hasBody = "body" in parameters;
     let fnName = camelCase(c.operationId);
+    let useJwt =
+      "header" in parameters &&
+      parameters.header.some((n) => n.name === "Authorization");
+    const dto = getDto(parameters);
     const comment = `/**
-                      * @description ${c.summary}
+                      * @description ${c.summary ? c.summary : ""}
+                      * needJwt ${useJwt}
                       */ `;
-    if (c.summary) {
-      res += comment + "\n";
-    }
+    // if (c.summary) {
+    res += comment + "\n";
+    // }
+
+    const outputDto = getOutputDto(c);
+    const outputString = outputDto ? `<${outputDto}>` : "";
+
     if (hasBody && !hasQuery) {
-      res += `static    ${fnName}(data: any) {
-                    return  http.${c.method}("${c.api}", data)
+      res += `static  ${fnName}(data: ${dto}) {
+                    return  http.${c.httpType}${outputString}("${c.api}", data)
                 }
+
             `;
       return;
     } else if (!hasBody && hasQuery) {
-      res += `static   ${fnName}(data: any) {
-                    return  http.${c.method}("${c.api}?" + queryString.stringify(data))
+      res += `static ${fnName}(data: any) {
+                    return  http.${c.httpType}${outputString}("${c.api}?" + queryString.stringify(data))
                 }
+
             `;
       return;
     } else if (hasBody && hasQuery) {
-      res += `static  ${fnName}(query: any, data: any) {
-                    return  http.${c.method}("${c.api}?" + queryString.stringify(query), data)
+      res += `static ${fnName}(query: any, data: ${dto}) {
+                    return  http.${c.httpType}${outputString}("${c.api}?" + queryString.stringify(query), data)
                 }
+
             `;
       return;
     } else {
-      res += `static    ${fnName}() {
-                return  http.${c.method}("${c.api}")
+      res += `static ${fnName}() {
+                return  http.${c.httpType}${outputString}("${c.api}")
               }
+
       `;
       return;
     }
@@ -69,18 +87,14 @@ function getChildModules(childs) {
   return res;
 }
 
-interface Options {
-  output?: {
-    path?: string;
-  };
-}
-
 /**
  * 创建dto和api文件
  * @param {*} json
  */
-const createApiCatelogs = async (json: Swagger, options: Options = {}) => {
+const createApiCatelogs = async (json: Swagger, options: Options) => {
   options = Object.assign({}, defualtOptions, options);
+
+  const outputPath = options.output.path;
 
   let paths = SwaggerHelper.instance.paths;
   const urls: ApiUrl[] = Object.keys(paths);
@@ -95,9 +109,9 @@ const createApiCatelogs = async (json: Swagger, options: Options = {}) => {
 
   // 清空dist目录
   // @ts-ignore
-  await rimrafAync(options.output.path);
+  await rimrafAync(outputPath);
   // 创建dist目录
-  await mkdirAsync(options.output.path);
+  await mkdirAsync(outputPath);
 
   let modules: {
     moduleName: string;
@@ -107,7 +121,7 @@ const createApiCatelogs = async (json: Swagger, options: Options = {}) => {
   moduleNames.forEach((moduleName, i) => {
     modules[i] = {
       moduleName: moduleName,
-      path: path.join(options.output.path, moduleName),
+      path: path.join(outputPath, moduleName),
       children: [],
     };
     urls.forEach((apiUrl) => {
@@ -128,21 +142,19 @@ const createApiCatelogs = async (json: Swagger, options: Options = {}) => {
   const dtoMap = SwaggerHelper.instance.getDtoMap();
 
   await writeFile(
-    path.join(cwd, "dist/dtos.json"),
+    path.join(outputPath, "./dtos.json"),
     Buffer.from(JSON.stringify(dtoMap)),
     {
       encoding: "utf-8",
     }
   );
   // 创建通用的dto目录
-  await mkdirAsync(path.join(cwd, "dist/dto"));
+  await mkdirAsync(path.join(outputPath, ".dto"));
 
   let s = "";
 
   // 泛型接口
   const genericDtos = SwaggerHelper.instance.getGenericDtos();
-  // 通用接口
-  const commonDtos = keys(dtoMap).filter((n) => !n.includes("["));
   for (let i = 0; i < genericDtos.length; i++) {
     const definitionKeys = Object.keys(json.definitions);
     const reg = new RegExp(`${genericDtos[i]}\[[a-zA-Z0-9]+\]`);
@@ -157,6 +169,8 @@ const createApiCatelogs = async (json: Swagger, options: Options = {}) => {
     }
   }
 
+  // 通用接口
+  const commonDtos = keys(dtoMap).filter((n) => !n.includes("["));
   for (let i = 0; i < commonDtos.length; i++) {
     let dto = json.definitions[commonDtos[i]];
     s += `
@@ -166,29 +180,24 @@ const createApiCatelogs = async (json: Swagger, options: Options = {}) => {
 
         `;
   }
-  s = prettier.format(s, { semi: false, parser: "babel" });
 
-  await new Promise((resolve, reject) => {
-    fs.writeFile(
-      path.join(cwd, "dist/dto.ts"),
-      Buffer.from(s, "utf-8"),
-      {
-        encoding: "utf-8",
-      },
-      (err) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(null);
-      }
-    );
+  s = prettier.format(s, { semi: false, parser: "babel-ts" });
+
+  await writeFile(path.join(outputPath, "dto.ts"), Buffer.from(s, "utf-8"), {
+    encoding: "utf-8",
   });
 
   // 创建模块
   for (let i = 0, len = modules.length; i < len; i++) {
-    await mkdirAsync(path.join(cwd, "dist", modules[i].moduleName));
+    const dtos = getDtos(modules[i].children);
+    let dtoImport = "";
+    if (dtos.length) {
+      dtoImport += `import { ${uniq(dtos).join(", ")} } from './dto'\n`;
+    }
     let s = `
             import http from "../http";
+            ${dtos.length ? dtoImport : ""}
+
             ${
               useQueryString(modules[i].children)
                 ? 'import queryString from "query-string"'
@@ -201,11 +210,10 @@ const createApiCatelogs = async (json: Swagger, options: Options = {}) => {
 
             export default  ${modules[i].moduleName};
         `;
-    // TODO prettier config
     s = prettier.format(s, { semi: false, parser: "babel-ts" });
 
     await writeFile(
-      path.join(modules[i].path, modules[i].moduleName + ".ts"),
+      path.join(`${modules[i].path}.ts`),
       Buffer.from(s, "utf-8"),
       {
         encoding: "utf-8",

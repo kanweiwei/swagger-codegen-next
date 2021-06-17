@@ -3,13 +3,12 @@ const path = require("path");
 const fs = require("fs");
 const process = require("process");
 const http = require("http");
-const fetchApi = require("../lib/index.js")
+const fetchApi = require("../lib/index.js");
 
-const envFileName = ".fetchapirc";
+const envFileName = "fetchapi.config.js";
 const envFilePath = path.join(process.cwd(), envFileName);
 if (fs.existsSync(envFilePath)) {
-  const fileContent = fs.readFileSync(envFilePath);
-  const data = JSON.parse(fileContent.toString());
+  const data = require(envFilePath);
   const url = data.url;
   let swaggerData = "";
   const client = http.get(url, (res) => {
@@ -18,10 +17,15 @@ if (fs.existsSync(envFilePath)) {
     });
     res.on("end", () => {
       const swaggerJson = JSON.parse(swaggerData);
-      fetchApi(swaggerJson)
+      fs.writeFileSync(
+        path.join(process.cwd(), ".swagger-cache"),
+        swaggerData,
+        { encoding: "utf-8" }
+      );
+      fetchApi(swaggerJson, data.options);
     });
   });
 } else {
-  console.error("can't find the .fetchapirc file");
+  console.error("can't find the fetchapi.config.js file");
   process.exit(0);
 }

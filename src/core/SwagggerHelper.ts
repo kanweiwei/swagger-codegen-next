@@ -110,6 +110,21 @@ export default class SwaggerHelper {
     return this._dtoMap;
   }
 
+  public getDtosFromGenericDto(dtoName) {
+    const chars = dtoName.split("");
+    let stack = [];
+    const names = [];
+    chars.forEach((char) => {
+      if (char !== "[" && char !== "]") {
+        stack.push(char);
+      } else {
+        names.push(stack.join(""));
+        stack = [];
+      }
+    });
+    return names;
+  }
+
   public getGenericDtos() {
     const genericDtos = Object.keys(this.getDtoMap()).filter((n) =>
       n.includes("[")
