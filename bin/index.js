@@ -5,7 +5,7 @@ const process = require("process");
 const http = require("http");
 const fetchApi = require("../lib/index.js");
 
-const envFileName = "fetchapi.config.js";
+const envFileName = "swagger-codegen.config.js";
 const envFilePath = path.join(process.cwd(), envFileName);
 if (fs.existsSync(envFilePath)) {
   const data = require(envFilePath);
@@ -41,6 +41,6 @@ if (fs.existsSync(envFilePath)) {
   }
   
 } else {
-  console.error("can't find the fetchapi.config.js file");
+  console.error("can't find the swagger-codegen.config.js file");
   process.exit(0);
 }
