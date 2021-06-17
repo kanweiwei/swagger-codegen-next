@@ -5,16 +5,16 @@ generate .ts api files by swagger.json
 ## 📦 Install
 
 ```bash
-npm install fetch-api
+npm install swagger-codegen-next
 ```
 
 ```bash
-yarn add fetch-api
+yarn add swagger-codegen-next
 ```
 
 ## 🔨 Usage
 ```
-fetch-api 
+swagger-codegen-next
 ```
 
 ## LICENSE

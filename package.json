@@ -1,5 +1,5 @@
 {
-  "name": "fetch-api",
+  "name": "swagger-codegen-next",
   "version": "0.0.1",
   "description": "根据swagger.json生成api文件",
   "keywords": [
@@ -7,7 +7,7 @@
     "typescript"
   ],
   "main": "./lib/index.js",
-  "bin": "./bin/fetch-api.js",
+  "bin": "./bin/index.js",
   "directories": {
     "lib": "lib"
   },
@@ -19,7 +19,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kanweiwei/fetch-api"
+    "url": "https://github.com/kanweiwei/swagger-codegen-next"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.4",
