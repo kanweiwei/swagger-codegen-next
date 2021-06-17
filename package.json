@@ -7,12 +7,13 @@
     "typescript"
   ],
   "main": "./lib/index.js",
+  "bin": "./bin/fetch-api.js",
   "directories": {
     "lib": "lib"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "babel src/ -d lib/"
+    "build": "npx babel src --out-dir lib --extensions \".ts\""
   },
   "author": "kanweiwei",
   "license": "MIT",
@@ -21,16 +22,21 @@
     "url": "https://github.com/kanweiwei/fetch-api"
   },
   "devDependencies": {
-    "babel-cli": "6.26.0",
-    "babel-plugin-syntax-async-functions": "6.13.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-flow": "6.23.0",
-    "flow-bin": "0.97.0",
+    "@babel/cli": "^7.7.4",
+    "@babel/core": "^7.7.4",
+    "@babel/plugin-syntax-async-generators": "^7.7.4",
+    "@babel/plugin-syntax-optional-chaining": "^7.8.3",
+    "@babel/plugin-transform-modules-commonjs": "^7.7.4",
+    "@babel/preset-typescript": "^7.7.4",
+    "@types/bluebird": "^3.5.35",
+    "@types/lodash-es": "^4.17.3",
+    "@types/node": "^15.12.2",
+    "@types/prettier": "^2.2.2"
   },
   "dependencies": {
-    "bluebird": "3.5.4",
-    "lodash": "^4.17.11",
-    "prettier": "1.17.0",
+    "bluebird": "3.7.2",
+    "lodash-es": "^4.17.15",
+    "prettier": "^2.3.1",
     "query-string": "^6.4.2",
     "rimraf": "^2.6.3"
   }

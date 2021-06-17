@@ -1,12 +1,8 @@
-// @flow
-
 export type DataTypes = "string" | "boolean" | "integer" | "array";
 
 export type Method = "post" | "delete" | "put" | "get";
 
-export interface Schema {
-  $ref: string;
-}
+export interface Schema extends DtoProperty {}
 export interface Parameter {
   name: string;
   in: "query" | "body" | "header";
@@ -17,22 +13,36 @@ export interface Parameter {
   default: string;
 }
 
+export type Produce = "text/plain" | "application/json" | "text/json";
 export interface PathItem {
-  httpType: "post" | "delete" | "get" | "put";
+  httpType: Method;
   tags: string[];
+  summary: string;
   operationId: string;
   consumes: string[];
-  produces: any[];
+  produces: Produce[];
   parameters: Parameter[];
+  responses: {
+    [x: string]: {
+      description: string;
+      schema?: Schema
+    };
+  };
+  api?: string;
 }
 
 export type ApiUrl = string;
 export interface Paths {
-  [x: ApiUrl]: PathItem;
+  [x: string]: { [k in Method]: PathItem };
+}
+
+export interface SwaggerPaths {
+  [x: string]: PathItem;
 }
 
 export interface DtoProperty {
-  format?: String;
+  $ref?: string;
+  format?: string;
   type?: DataTypes;
   enum?: number[];
   maximum?: Number;
@@ -40,15 +50,14 @@ export interface DtoProperty {
   readOnly?: Boolean;
   uniqueItems?: Boolean;
   maxLength?: Number;
-  items: {
-    $ref: String
-  };
+  items: Schema;
 }
 
 export interface Dto {
+  required?: string[];
   type: "object";
   properties: {
-    [x: string]: DtoProperty
+    [propertyName: string]: DtoProperty;
   };
 }
 
@@ -57,7 +66,21 @@ export interface Dtos {
 }
 
 export interface Swagger {
+  swagger: string;
+  info: {
+    version: string;
+    title: string;
+  };
   paths: Paths;
   definitions: Dtos;
   [propName: string]: any;
+}
+
+export interface Options {
+  output?: {
+    /**
+     * 输出目录的绝对路径
+     */
+    path?: string;
+  };
 }
