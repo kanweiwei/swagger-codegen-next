@@ -1,5 +1,5 @@
 import dataTypes from "../core/dataTypes";
-import { DtoProperty } from "../interface";
+import { DtoProperties, DtoProperty } from "../interface";
 
 export function getType(schema: DtoProperty) {
   let type = dataTypes[schema.type];
@@ -7,39 +7,33 @@ export function getType(schema: DtoProperty) {
     // dto
     if (schema.$ref) {
       type = getDtoName(schema.$ref);
-    } 
+    }
   }
   if (type === "[]") {
     if ("type" in schema.items) {
       type = dataTypes[schema.items.type] + "[]";
     } else if ("$ref" in schema.items) {
-      type = getType(schema.items) +
-          "[]";
+      type = getType(schema.items) + "[]";
     }
   }
   return type;
 }
 
 export function getDtoName(str: string) {
-  if(/\#\/definitions\/([\w\[\]]*)/i.exec(str)){
-    return RegExp.$1.replace('[','<').replace(']','>')
+  if (/\#\/definitions\/([\w\[\]]*)/i.exec(str)) {
+    return RegExp.$1.replace("[", "<").replace("]", ">");
   }
-  return ''
+  return "";
 }
 
 function getProperties(
   dtoName: string,
-  { properties, required }: { properties: any; required?: string[] }
+  { properties, required }: { properties: DtoProperties; required?: string[] }
 ) {
   let res: string = "";
   Object.keys(properties).forEach((p) => {
-    let isRequired: "" | "?" = (() => {
-      if (required && required.includes(p)) {
-        return "";
-      } else {
-        return "?";
-      }
-    })();
+    let isRequired = required && required.includes(p) ? "" : "?";
+
     let type = dataTypes[properties[p].type];
     let description = properties[p].description;
     if (!type) {
@@ -47,7 +41,7 @@ function getProperties(
       if (dtoName.includes("[")) {
         type = "T";
       } else {
-        type = properties[p].$ref.match(/\#\/definitions\/([\w\[\]]*)/i)[1];
+        type = getDtoName(properties[p].$ref);
       }
     }
     if (type === "[]") {
@@ -57,9 +51,7 @@ function getProperties(
         if (dtoName.includes("[")) {
           type = "T[]";
         } else {
-          type =
-            properties[p].items.$ref.match(/\#\/definitions\/([\w\[\]]*)/i)[1] +
-            "[]";
+          type = getDtoName(properties[p].items.$ref) + "[]";
         }
       }
     }

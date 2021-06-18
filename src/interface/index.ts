@@ -25,7 +25,7 @@ export interface PathItem {
   responses: {
     [x: string]: {
       description: string;
-      schema?: Schema
+      schema?: Schema;
     };
   };
   api?: string;
@@ -41,6 +41,7 @@ export interface SwaggerPaths {
 }
 
 export interface DtoProperty {
+  description?: string;
   $ref?: string;
   format?: string;
   type?: DataTypes;
@@ -53,12 +54,14 @@ export interface DtoProperty {
   items: Schema;
 }
 
+export type DtoProperties = {
+  [propertyName: string]: DtoProperty;
+};
+
 export interface Dto {
   required?: string[];
   type: "object";
-  properties: {
-    [propertyName: string]: DtoProperty;
-  };
+  properties: DtoProperties;
 }
 
 export interface Dtos {

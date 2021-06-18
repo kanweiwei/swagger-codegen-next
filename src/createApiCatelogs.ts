@@ -7,13 +7,14 @@ import {
   flow,
   groupBy,
   keys,
-  uniq
+  uniq,
 } from "lodash";
 import path from "path";
 import prettier from "prettier";
 import dataTypes from "./core/dataTypes";
 import SwaggerHelper from "./core/SwagggerHelper";
 import { ApiUrl, Options, Parameter, PathItem, Swagger } from "./interface";
+import { getBodyDataType } from "./utils/getBodyDataType";
 import { getDto } from "./utils/getDto";
 import { getDtos } from "./utils/getDtos";
 import getOutputDto from "./utils/getOutputDto";
@@ -31,17 +32,16 @@ const defualtOptions = {
   },
 };
 
-
 function getQueryData(item: PathItem) {
   let parameters: {
     [k in "header" | "query" | "body"]?: Parameter[];
   } = groupBy(item.parameters, "in");
-  if(!parameters.query) return  ;
-  let s = '{';
-  parameters.query.forEach(n => {
-    s += `${n.name}${n.required? '':'?'}:${dataTypes[n.type]};`
-  })
-  s+='}';
+  if (!parameters.query) return;
+  let s = "{";
+  parameters.query.forEach((n) => {
+    s += `${n.name}${n.required ? "" : "?"}:${dataTypes[n.type]};`;
+  });
+  s += "}";
   return s;
 }
 
@@ -57,10 +57,9 @@ function getChildModules(childs: PathItem[]) {
     let useJwt =
       "header" in parameters &&
       parameters.header.some((n) => n.name === "Authorization");
-    const dto = getDto(parameters);
+    const dto = getBodyDataType(parameters);
     const comment = `/**
                       * @description ${c.summary ? c.summary : ""}
-                      * needJwt ${useJwt}
                       */ `;
     // if (c.summary) {
     res += comment + "\n";
@@ -69,7 +68,7 @@ function getChildModules(childs: PathItem[]) {
     const outputDto = getOutputDto(c);
     const outputString = outputDto ? `<${outputDto}>` : "";
 
-    const queryData = getQueryData(c)
+    const queryData = getQueryData(c);
 
     if (hasBody && !hasQuery) {
       res += `static  ${fnName}(data: ${dto}) {
@@ -199,7 +198,7 @@ const createApiCatelogs = async (json: Swagger, options: Options) => {
     const dtos = getDtos(modules[i].children);
     let dtoImport = "";
     if (dtos.length) {
-      dtoImport += `import { ${uniq(dtos).join(", ")} } from './dto'\n`;
+      dtoImport += `import { ${uniq(dtos).join(",\n ")} } from './dto';\n`;
     }
     let s = `
             import http from "../http";

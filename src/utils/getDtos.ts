@@ -5,25 +5,23 @@ import { PathItem, Parameter, Schema } from "../interface";
 import { getDto } from "./getDto";
 
 function getDtoListFromSchema(schema: Schema, list: string[]) {
-  if(schema.$ref) {
+  if (schema.$ref) {
     if (/#\/definitions\/([\w\[\]]*)/i.exec(schema.$ref)) {
       if (RegExp.$1.includes("[")) {
-        let dtoNames = SwaggerHelper.instance.getDtosFromGenericDto(
-          RegExp.$1
-        );
+        let dtoNames = SwaggerHelper.instance.getDtosFromGenericDto(RegExp.$1);
         list = [...list, ...dtoNames];
       } else {
         list.push(RegExp.$1);
       }
     }
   }
-  if(dataTypes[schema.type]) {
-    if(dataTypes[schema.type] === '[]'){
+  if (dataTypes[schema.type]) {
+    if (dataTypes[schema.type] === "[]") {
       const items = schema.items;
-      list = getDtoListFromSchema(items,list);
+      list = getDtoListFromSchema(items, list);
     }
   }
-  return list.filter(n => !['Object'].includes(n));
+  return list.filter((n) => !["Object", "number"].includes(n));
 }
 
 /**
@@ -44,9 +42,8 @@ export function getDtos(childs: PathItem[]) {
     }
     // output dto
     if (c.responses["200"].schema) {
-      res = getDtoListFromSchema(c.responses["200"].schema, res)
-      
+      res = getDtoListFromSchema(c.responses["200"].schema, res);
     }
   });
-  return res;
+  return res.filter((n) => !["Object", "number"].includes(n));
 }

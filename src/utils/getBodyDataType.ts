@@ -1,7 +1,7 @@
 import { Parameter } from "../interface";
 import { getType } from "./getProperties";
 
-export function getDto(
+export function getBodyDataType(
   parameters: {
     [k in "header" | "query" | "body"]?: Parameter[];
   }
@@ -10,8 +10,8 @@ export function getDto(
   if ("body" in parameters) {
     const target = parameters.body[0];
     if (target) {
-      res = getType(target.schema).replace("[]", "");
+      res = getType(target.schema);
     }
   }
-  return res
+  return res;
 }
