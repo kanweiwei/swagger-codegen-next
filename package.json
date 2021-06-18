@@ -1,6 +1,6 @@
 {
   "name": "swagger-codegen-next",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "根据swagger.json生成api文件",
   "keywords": [
     "swagger",
