@@ -3,7 +3,7 @@ const path = require("path");
 const fs = require("fs");
 const process = require("process");
 const http = require("http");
-const fetchApi = require("../lib/index.js");
+const codegen = require("../lib/index.js");
 
 const envFileName = "swagger-codegen.config.js";
 const envFilePath = path.join(process.cwd(), envFileName);
@@ -17,7 +17,7 @@ if (fs.existsSync(envFilePath)) {
         console.log(err.message + '\n');
         process.exit(0);
       }
-      fetchApi(JSON.parse(t.toString('utf-8')), data.options);
+      codegen(JSON.parse(t.toString('utf-8')), data.options);
     })
   } else {
     const url = data.url;
@@ -35,7 +35,7 @@ if (fs.existsSync(envFilePath)) {
           swaggerData,
           { encoding: "utf-8" }
         );
-        fetchApi(swaggerJson, data.options);
+        codegen(swaggerJson, data.options);
       });
     });
   }
