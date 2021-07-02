@@ -5,6 +5,7 @@ const process = require("process");
 const http = require("http");
 const codegen = require("../lib/index.js");
 const ora = require("ora");
+const axios = require("axios");
 
 const envFileName = "swagger-codegen.config.js";
 const envFilePath = path.join(process.cwd(), envFileName);
@@ -22,24 +23,28 @@ if (fs.existsSync(envFilePath)) {
     });
   } else {
     const url = data.url;
-    let swaggerData = "";
-    const spinner = ora("request swagger.json").start();
-    const client = http.get(url, (res) => {
-      res.on("data", (c) => {
-        swaggerData += c;
-      });
-      res.on("end", () => {
-        spinner.succeed();
-        const swaggerJson = JSON.parse(swaggerData);
-        fs.writeFileSync(
-          path.join(process.cwd(), ".swagger-cache"),
-          swaggerData,
-          { encoding: "utf-8" }
-        );
-        ora('generate .swagger-cache').succeed()
-        codegen(swaggerJson, data);
-      });
-    });
+    if (url.startsWith("http")) {
+      const spinner = ora("request swagger.json").start();
+      axios
+        .get(data.url)
+        .then((res) => {
+          spinner.succeed();
+          fs.writeFileSync(
+            path.join(process.cwd(), ".swagger-cache"),
+            res.data,
+            { encoding: "utf-8" }
+          );
+          ora("generate .swagger-cache").succeed();
+          codegen(res.data, data);
+        })
+        .catch((err) => {
+          spinner.fail();
+          console.log(err);
+          process.exit(0);
+        });
+      return;
+    }
+    throw new Error('"url" is invalid');
   }
 } else {
   console.error("can't find the swagger-codegen.config.js file");
