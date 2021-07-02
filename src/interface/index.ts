@@ -86,4 +86,8 @@ export interface Options {
      */
     path?: string;
   };
+  /**
+   *  获取模块名称
+   */
+  getModuleName: (path: string) => string;
 }

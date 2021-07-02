@@ -114,12 +114,9 @@ const createApiCatelogs = async (json: Swagger, options: Options) => {
 
   let paths = SwaggerHelper.instance.paths;
   const urls: ApiUrl[] = Object.keys(paths);
-  let moduleNames: string[] = flow(
-    flattenDeep,
-    uniq
-  )(
+  let moduleNames: string[] = uniq(
     urls.map((pathName) => {
-      return paths[pathName].tags;
+      return options.getModuleName(pathName);
     })
   );
 

@@ -11,5 +11,8 @@ const defualtOptions = {
 
 export default function initOptions(options: Options) {
   options = Object.assign({}, defualtOptions, options);
+  if (!options.getModuleName) {
+    throw new Error("\"getModuleName\" must be defined");
+  }
   return options;
 }

@@ -3,7 +3,7 @@ import createApiCatelogs from "./createApiCatelogs";
 import SwaggerHelper from "./core/SwagggerHelper";
 import initOptions from "./utils/initOptions";
 
-module.exports = async (json: Swagger, options: Options = {}) => {
+module.exports = async (json: Swagger, options: Options) => {
   options = initOptions(options);
 
   SwaggerHelper.instance.init(json);

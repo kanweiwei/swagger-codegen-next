@@ -17,7 +17,7 @@ if (fs.existsSync(envFilePath)) {
         console.log(err.message + '\n');
         process.exit(0);
       }
-      codegen(JSON.parse(t.toString('utf-8')), data.options);
+      codegen(JSON.parse(t.toString('utf-8')), data);
     })
   } else {
     const url = data.url;
