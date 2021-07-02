@@ -31,14 +31,14 @@
     "@types/bluebird": "^3.5.35",
     "@types/lodash-es": "^4.17.3",
     "@types/node": "^15.12.2",
-    "@types/prettier": "^2.2.2"
+    "@types/prettier": "^2.2.2",
+    "bluebird": "^3.7.2",
+    "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
+    "prettier": "^2.3.2",
+    "rimraf": "^3.0.2"
   },
   "dependencies": {
-    "bluebird": "3.7.2",
-    "lodash": "^4.17.21",
-    "lodash-es": "^4.17.15",
-    "prettier": "^2.3.1",
-    "query-string": "^6.4.2",
-    "rimraf": "^2.6.3"
+    "query-string": "^6.4.2"
   }
 }
