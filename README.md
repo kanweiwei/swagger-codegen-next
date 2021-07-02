@@ -37,8 +37,8 @@ module.exports = {
     return /api\/([^\/]*)/.exec(url)[1];
   },
 };
-```
 
+```
 Now you can run the _swagger-codegen-next_:
 
 ```bash
@@ -71,7 +71,7 @@ The **output** property tells `swagger-codegen-next` where to emit the _api file
 
 ```javascript
 {
-		output: {
+    output: {
         path: path.join(cwd, 'services') // default
     },
 }
