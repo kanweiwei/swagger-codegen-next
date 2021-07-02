@@ -31,7 +31,7 @@ if (fs.existsSync(envFilePath)) {
           spinner.succeed();
           fs.writeFileSync(
             path.join(process.cwd(), ".swagger-cache"),
-            res.data,
+            JSON.stringify(res.data),
             { encoding: "utf-8" }
           );
           ora("generate .swagger-cache").succeed();
@@ -42,6 +42,11 @@ if (fs.existsSync(envFilePath)) {
           console.log(err);
           process.exit(0);
         });
+      return;
+    }
+    if (fs.existsSync(url)) {
+      const json = require(url);
+      codegen(json, data);
       return;
     }
     throw new Error('"url" is invalid');

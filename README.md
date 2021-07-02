@@ -41,10 +41,61 @@ module.exports = {
 
 ```
 
-bash 
+Now you can run the *swagger-codegen-next*:
 ```bash
 swagger-codegen-next
 ```
 
+
+
+## Config
+
+### *url
+
+- support HTTP/HTTPS
+
+  ```json
+  {
+    "url": "http://***.swaggger.json" // https://***.swagger.json
+  }
+  ```
+
+  
+
+- support absolute path
+
+  ```json
+  {
+    "url": path.resolve(__dirname, "./swagger.json")
+  }
+  ```
+
+### *output
+
+The **output** property tells `swagger-codegen-next` where to emit the *api files* .
+
+```json
+{
+		output: {
+        path: path.join(cwd, 'services') // default
+    },
+}
+```
+
+## *getModuleName
+
+The **getModuleName** method can help `swagger-codegen-next` to group the APIs.
+
+```javascript
+{
+  getModuleName(url){
+    return /api\/([^\/]*)/.exec(url)[1]
+  }
+}
+```
+
+
+
 ## LICENSE
+
 MIT
