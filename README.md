@@ -14,11 +14,10 @@ npm install swagger-codegen-next -g
 yarn global add swagger-codegen-next
 ```
 
-
-
 ## 🔨 Usage
 
 ### Configuration File
+
 swagger-codegen.config.js
 
 ```javascript
@@ -27,54 +26,50 @@ const path = require("path");
 const cwd = process.cwd();
 
 module.exports = {
-  	// swagger文件地址
-    url: 'http://***/swagger.json',
-  	// 输出目录
-    output: {
-        path: path.join(cwd, 'services') // default
-    },
-  	// 获取接口模块名称
-  	getModuleName(url){
-      return /api\/([^\/]*)/.exec(url)[1]
-    }
-}
-
+  // swagger文件地址
+  url: "http://***/swagger.json",
+  // 输出目录
+  output: {
+    path: path.join(cwd, "services"), // default
+  },
+  // 获取接口模块名称
+  getModuleName(url) {
+    return /api\/([^\/]*)/.exec(url)[1];
+  },
+};
 ```
 
-Now you can run the *swagger-codegen-next*:
+Now you can run the _swagger-codegen-next_:
+
 ```bash
 swagger-codegen-next
 ```
 
-
-
 ## Config
 
-### *url
+### \*url
 
 - support HTTP/HTTPS
 
-  ```json
+  ```javascript
   {
     "url": "http://***.swaggger.json" // https://***.swagger.json
   }
   ```
 
-  
-
 - support absolute path
 
-  ```json
+  ```javascript
   {
     "url": path.resolve(__dirname, "./swagger.json")
   }
   ```
 
-### *output
+### \*output
 
-The **output** property tells `swagger-codegen-next` where to emit the *api files* .
+The **output** property tells `swagger-codegen-next` where to emit the _api files_ .
 
-```json
+```javascript
 {
 		output: {
         path: path.join(cwd, 'services') // default
@@ -82,7 +77,7 @@ The **output** property tells `swagger-codegen-next` where to emit the *api file
 }
 ```
 
-## *getModuleName
+## \*getModuleName
 
 The **getModuleName** method can help `swagger-codegen-next` to group the APIs.
 
@@ -93,8 +88,6 @@ The **getModuleName** method can help `swagger-codegen-next` to group the APIs.
   }
 }
 ```
-
-
 
 ## LICENSE
 
