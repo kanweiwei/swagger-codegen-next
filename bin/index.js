@@ -35,7 +35,7 @@ if (fs.existsSync(envFilePath)) {
           swaggerData,
           { encoding: "utf-8" }
         );
-        codegen(swaggerJson, data.options);
+        codegen(swaggerJson, data);
       });
     });
   }
