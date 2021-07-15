@@ -1,9 +1,11 @@
 import { first, keys, uniq } from "lodash";
 import {
   Dtos,
-  Method, Paths,
+  Method,
+  Paths,
   Swagger,
-  SwaggerPaths
+  SwaggerPaths,
+  URLWithMethod,
 } from "../interface";
 
 interface DtoMap {
@@ -31,6 +33,7 @@ export default class SwaggerHelper {
 
   public definitions: Dtos;
   public paths: SwaggerPaths;
+  public urls: URLWithMethod[] = [];
 
   public init(json: Swagger) {
     this.initPaths(json.paths);
@@ -42,16 +45,18 @@ export default class SwaggerHelper {
       return;
     }
     const apiUrls = keys(paths);
-    const pathMap: SwaggerPaths = {};
-    apiUrls.forEach((api) => {
+    this.paths = apiUrls.reduce((map, api) => {
       let path = paths[api];
-      let method = first(Object.keys(path)) as Method;
-      pathMap[api] = {
-        ...path[method],
-        httpType: method,
-      };
-    });
-    this.paths = pathMap;
+      Object.keys(path).forEach((method) => {
+        const url = `${method},${api}`;
+        this.urls.push(url as URLWithMethod);
+        map[url] = {
+          ...path[method],
+          httpType: method,
+        };
+      });
+      return map;
+    }, {} as SwaggerPaths);
   }
 
   public initDefinitions(definitions: Dtos) {
@@ -76,11 +81,10 @@ export default class SwaggerHelper {
       };
     });
     const paths = this.paths;
-    const urls = Object.keys(this.paths);
     let reg = /"\$ref":\s*"\#\/definitions\/([\w\[\]]*)"/gim;
     let sreg = /"\$ref":\s*"\#\/definitions\/([\w\[\]]*)"/im;
-    for (let i = 0, len = urls.length; i < len; i++) {
-      let methodBody = paths[urls[i]];
+    for (let i = 0, len = this.urls.length; i < len; i++) {
+      let methodBody = paths[this.urls[i]];
       let methodBodyString = JSON.stringify(methodBody);
       let match = methodBodyString.match(reg);
       let names = [];

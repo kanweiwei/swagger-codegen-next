@@ -2,20 +2,25 @@ import PromiseA from "bluebird";
 import fs from "fs";
 import {
   camelCase,
-  first,
-  flattenDeep,
-  flow,
+
+
+
   groupBy,
   keys,
-  uniq,
+  uniq
 } from "lodash";
 import path from "path";
 import prettier from "prettier";
 import dataTypes from "./core/dataTypes";
 import SwaggerHelper from "./core/SwagggerHelper";
-import { ApiUrl, Options, Parameter, PathItem, Swagger } from "./interface";
+import {
+  Options,
+  Parameter,
+  PathItem,
+  Swagger,
+  URLWithMethod
+} from "./interface";
 import { getBodyDataType } from "./utils/getBodyDataType";
-import { getDto } from "./utils/getDto";
 import { getDtos } from "./utils/getDtos";
 import getOutputDto from "./utils/getOutputDto";
 import getProperties from "./utils/getProperties";
@@ -79,14 +84,14 @@ function getChildModules(childs: PathItem[]) {
       return;
     } else if (!hasBody && hasQuery) {
       res += `static ${fnName}(data: ${queryData}) {
-                    return  http.${c.httpType}${outputString}("${c.api}?" + queryString.stringify(data))
+                    return  http.${c.httpType}${outputString}(\`${c.api}?\$\{queryString.stringify(data)\}\`)
                 }
 
             `;
       return;
     } else if (hasBody && hasQuery) {
       res += `static ${fnName}(query: ${queryData}, data: ${dto}) {
-                    return  http.${c.httpType}${outputString}("${c.api}?" + queryString.stringify(query), data)
+                    return  http.${c.httpType}${outputString}(\`${c.api}?\$\{queryString.stringify(query)\}\`, data)
                 }
 
             `;
@@ -108,42 +113,41 @@ function getChildModules(childs: PathItem[]) {
  * @param {*} json
  */
 const createApiCatelogs = async (json: Swagger, options: Options) => {
-  options = Object.assign({}, defualtOptions, options);
-
   const outputPath = options.output.path;
-
-  let paths = SwaggerHelper.instance.paths;
-  const urls: ApiUrl[] = Object.keys(paths);
-  let moduleNames: string[] = uniq(
-    urls.map((pathName) => {
-      return options.getModuleName(pathName);
-    })
-  );
-
   // 清空dist目录
   // @ts-ignore
   await rimrafAync(outputPath);
   // 创建dist目录
   await mkdirAsync(outputPath);
 
+  options = Object.assign({}, defualtOptions, options);
+
+  let paths = SwaggerHelper.instance.paths;
+  const urls: URLWithMethod[] = SwaggerHelper.instance.urls;
+  let moduleNames: string[] = uniq(
+    urls.map((pathName) => {
+      return options.getModuleName(pathName.split(",")[1]);
+    })
+  );
+
   let modules: {
     moduleName: string;
-    path: string;
+    filePath: string;
     children: any[];
   }[] = [];
   moduleNames.forEach((moduleName, i) => {
     modules[i] = {
       moduleName: moduleName,
-      path: path.join(outputPath, moduleName),
+      filePath: path.join(outputPath, moduleName),
       children: [],
     };
     urls.forEach((apiUrl) => {
       let path = paths[apiUrl];
       let method = path.httpType;
-      let tag = first(path.tags);
-      if (tag === moduleName) {
+      const api = apiUrl.split(",")[1];
+      if (options.getModuleName(api) === moduleName) {
         modules[i].children.push({
-          api: apiUrl,
+          api,
           method: method,
           ...path,
         });
@@ -199,13 +203,14 @@ const createApiCatelogs = async (json: Swagger, options: Options) => {
     }
     let s = `
             import http from "../http";
-            ${dtos.length ? dtoImport : ""}
-
             ${
               useQueryString(modules[i].children)
-                ? 'import queryString from "query-string"'
+                ? 'import queryString from "query-string";'
                 : ""
             }
+            ${dtos.length ? dtoImport : ""}
+
+            
 
             class ${modules[i].moduleName} {
                 ${getChildModules(modules[i].children)}
@@ -216,7 +221,7 @@ const createApiCatelogs = async (json: Swagger, options: Options) => {
     s = prettier.format(s, { semi: false, parser: "babel-ts" });
 
     await writeFile(
-      path.join(`${modules[i].path}.ts`),
+      path.join(`${modules[i].filePath}.ts`),
       Buffer.from(s, "utf-8"),
       {
         encoding: "utf-8",

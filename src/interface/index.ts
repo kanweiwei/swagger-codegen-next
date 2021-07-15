@@ -36,6 +36,10 @@ export interface Paths {
   [x: string]: { [k in Method]: PathItem };
 }
 
+type Url = string;
+
+export type URLWithMethod = `${Method},${Url}`;
+
 export interface SwaggerPaths {
   [x: string]: PathItem;
 }
