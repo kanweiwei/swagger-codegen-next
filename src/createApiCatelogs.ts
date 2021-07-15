@@ -1,28 +1,12 @@
 import PromiseA from "bluebird";
 import fs from "fs";
-import {
-  camelCase,
-
-
-
-  groupBy,
-  keys,
-  uniq
-} from "lodash";
+import { keys, uniq } from "lodash";
 import path from "path";
 import prettier from "prettier";
-import dataTypes from "./core/dataTypes";
 import SwaggerHelper from "./core/SwagggerHelper";
-import {
-  Options,
-  Parameter,
-  PathItem,
-  Swagger,
-  URLWithMethod
-} from "./interface";
-import { getBodyDataType } from "./utils/getBodyDataType";
+import { Options, Swagger, URLWithMethod } from "./interface";
+import { getChildModules } from "./utils/getChildModules";
 import { getDtos } from "./utils/getDtos";
-import getOutputDto from "./utils/getOutputDto";
 import getProperties from "./utils/getProperties";
 import useQueryString from "./utils/useQueryString";
 import writeFile from "./utils/writeFile";
@@ -36,77 +20,6 @@ const defualtOptions = {
     path: path.join(cwd, "./dist"),
   },
 };
-
-function getQueryData(item: PathItem) {
-  let parameters: {
-    [k in "header" | "query" | "body"]?: Parameter[];
-  } = groupBy(item.parameters, "in");
-  if (!parameters.query) return;
-  let s = "{";
-  parameters.query.forEach((n) => {
-    s += `${n.name}${n.required ? "" : "?"}:${dataTypes[n.type]};`;
-  });
-  s += "}";
-  return s;
-}
-
-function getChildModules(childs: PathItem[]) {
-  let res = "";
-  childs.forEach((c) => {
-    let parameters: {
-      [k in "header" | "query" | "body"]?: Parameter[];
-    } = groupBy(c.parameters, "in");
-    let hasQuery = "query" in parameters;
-    let hasBody = "body" in parameters;
-    let fnName = camelCase(c.operationId);
-    let useJwt =
-      "header" in parameters &&
-      parameters.header.some((n) => n.name === "Authorization");
-    const dto = getBodyDataType(parameters);
-    const comment = `/**
-                      * @description ${c.summary ? c.summary : ""}
-                      */ `;
-    // if (c.summary) {
-    res += comment + "\n";
-    // }
-
-    const outputDto = getOutputDto(c);
-    const outputString = outputDto ? `<${outputDto}>` : "";
-
-    const queryData = getQueryData(c);
-
-    if (hasBody && !hasQuery) {
-      res += `static  ${fnName}(data: ${dto}) {
-                    return  http.${c.httpType}${outputString}("${c.api}", data)
-                }
-
-            `;
-      return;
-    } else if (!hasBody && hasQuery) {
-      res += `static ${fnName}(data: ${queryData}) {
-                    return  http.${c.httpType}${outputString}(\`${c.api}?\$\{queryString.stringify(data)\}\`)
-                }
-
-            `;
-      return;
-    } else if (hasBody && hasQuery) {
-      res += `static ${fnName}(query: ${queryData}, data: ${dto}) {
-                    return  http.${c.httpType}${outputString}(\`${c.api}?\$\{queryString.stringify(query)\}\`, data)
-                }
-
-            `;
-      return;
-    } else {
-      res += `static ${fnName}() {
-                return  http.${c.httpType}${outputString}("${c.api}")
-              }
-
-      `;
-      return;
-    }
-  });
-  return res;
-}
 
 /**
  * 创建dto和api文件
@@ -209,8 +122,6 @@ const createApiCatelogs = async (json: Swagger, options: Options) => {
                 : ""
             }
             ${dtos.length ? dtoImport : ""}
-
-            
 
             class ${modules[i].moduleName} {
                 ${getChildModules(modules[i].children)}

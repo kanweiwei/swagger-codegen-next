@@ -41,7 +41,7 @@ export function getDtos(childs: PathItem[]) {
       res.push(dto);
     }
     // output dto
-    if (c.responses["200"].schema) {
+    if (c.responses["200"] && c.responses["200"].schema) {
       res = getDtoListFromSchema(c.responses["200"].schema, res);
     }
   });

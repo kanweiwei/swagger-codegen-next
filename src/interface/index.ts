@@ -3,9 +3,11 @@ export type DataTypes = "string" | "boolean" | "integer" | "array";
 export type Method = "post" | "delete" | "put" | "get";
 
 export interface Schema extends DtoProperty {}
+
+export type ParameterIn = "query" | "body" | "header" | "path";
 export interface Parameter {
   name: string;
-  in: "query" | "body" | "header";
+  in: ParameterIn;
   required: Boolean;
   schema?: Schema;
   description: string;
