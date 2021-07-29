@@ -36,6 +36,8 @@ module.exports = {
   getModuleName(url) {
     return /api\/([^\/]*)/.exec(url)[1];
   },
+  // 需要跳过生成的接口
+  exclude: []
 };
 
 ```
@@ -87,6 +89,14 @@ The **getModuleName** method can help `swagger-codegen-next` to group the APIs.
     return /api\/([^\/]*)/.exec(url)[1]
   }
 }
+```
+
+## exclude
+skip target swagger paths
+
+eg:
+```
+exclude: ["/api/user/add"]
 ```
 
 ## LICENSE
