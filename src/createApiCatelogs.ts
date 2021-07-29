@@ -4,11 +4,12 @@ import { keys, uniq } from "lodash";
 import path from "path";
 import prettier from "prettier";
 import SwaggerHelper from "./core/SwagggerHelper";
-import { Options, Swagger, URLWithMethod } from "./interface";
+import { Swagger, URLWithMethod } from "./interface";
 import { getChildModules } from "./utils/getChildModules";
 import { getDtos } from "./utils/getDtos";
 import getProperties from "./utils/getProperties";
 import useQueryString from "./utils/useQueryString";
+import { upperCamelCase } from "./utils/util";
 import writeFile from "./utils/writeFile";
 
 const rimrafAync = PromiseA.promisify(require("rimraf"));
@@ -107,8 +108,9 @@ const createApiCatelogs = async (json: Swagger) => {
     if (dtos.length) {
       dtoImport += `import { ${uniq(dtos).join(",\n ")} } from './dto';\n`;
     }
+    const moduleName = upperCamelCase(modules[i].moduleName);
     let s = `
-            import http from "../http";
+            ${SwaggerHelper.instance.options.template.http};
             ${
               useQueryString(modules[i].children)
                 ? 'import queryString from "query-string";'
@@ -116,11 +118,11 @@ const createApiCatelogs = async (json: Swagger) => {
             }
             ${dtos.length ? dtoImport : ""}
 
-            class ${modules[i].moduleName} {
+            class ${moduleName} {
                 ${getChildModules(modules[i].children)}
             }
 
-            export default  ${modules[i].moduleName};
+            export default  ${moduleName};
         `;
     s = prettier.format(s, { semi: false, parser: "babel-ts" });
 

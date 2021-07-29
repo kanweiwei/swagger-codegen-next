@@ -9,6 +9,9 @@ const defualtOptions: Partial<Options> = {
     path: path.join(cwd, "./services"),
   },
   exclude: [],
+  template: {
+    http: 'import http from "../http";',
+  },
 };
 
 export default function initOptions(options: Options) {

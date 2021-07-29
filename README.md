@@ -36,11 +36,18 @@ module.exports = {
   getModuleName(url) {
     return /api\/([^\/]*)/.exec(url)[1];
   },
+  // 获取接口名
+  getMethodName(operationId) {
+    return operationId;
+  },
   // 需要跳过生成的接口
-  exclude: []
+  exclude: [],
+  template: {
+    http: 'import http from "../http";'
+  }
 };
-
 ```
+
 Now you can run the _swagger-codegen-next_:
 
 ```bash
@@ -90,11 +97,15 @@ The **getModuleName** method can help `swagger-codegen-next` to group the APIs.
   }
 }
 ```
+## getMethodName
+add `getMethodName` to support to customize the name of a method.
 
 ## exclude
+
 skip target swagger paths
 
 eg:
+
 ```
 exclude: ["/api/user/add"]
 ```

@@ -1,5 +1,6 @@
 import { camelCase, groupBy } from "lodash";
 import dataTypes from "../core/dataTypes";
+import SwaggerHelper from "../core/SwagggerHelper";
 import { Parameter, ParameterIn, PathItem } from "../interface";
 import { getBodyDataType } from "./getBodyDataType";
 import getOutputDto from "./getOutputDto";
@@ -15,6 +16,9 @@ export function getChildModules(childs: PathItem[]) {
     let hasBody = "body" in parameters;
     let hasPath = "path" in parameters;
     let fnName = camelCase(c.operationId);
+    if (SwaggerHelper.instance.options.getMethodName) {
+      fnName = SwaggerHelper.instance.options.getMethodName(c.operationId);
+    }
     let useJwt =
       "header" in parameters &&
       parameters.header.some((n) => n.name === "Authorization");
