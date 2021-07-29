@@ -1,18 +1,21 @@
-import { Options } from "../interface";
 import path from "path";
+import SwaggerHelper from "../core/SwagggerHelper";
+import { Options } from "../interface";
 
 const cwd = process.cwd();
 
-const defualtOptions = {
+const defualtOptions: Partial<Options> = {
   output: {
     path: path.join(cwd, "./services"),
   },
+  exclude: [],
 };
 
 export default function initOptions(options: Options) {
   options = Object.assign({}, defualtOptions, options);
   if (!options.getModuleName) {
-    throw new Error("\"getModuleName\" must be defined");
+    throw new Error('"getModuleName" must be defined');
   }
+  SwaggerHelper.instance.options = options;
   return options;
 }

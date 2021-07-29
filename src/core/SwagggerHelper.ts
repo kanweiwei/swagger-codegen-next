@@ -2,6 +2,7 @@ import { first, keys, uniq } from "lodash";
 import {
   Dtos,
   Method,
+  Options,
   Paths,
   Swagger,
   SwaggerPaths,
@@ -35,6 +36,8 @@ export default class SwaggerHelper {
   public paths: SwaggerPaths;
   public urls: URLWithMethod[] = [];
 
+  public options: Options;
+
   public init(json: Swagger) {
     this.initPaths(json.paths);
     this.initDefinitions(json.definitions);
@@ -49,6 +52,9 @@ export default class SwaggerHelper {
       let path = paths[api];
       Object.keys(path).forEach((method) => {
         const url = `${method},${api}`;
+        if (SwaggerHelper.instance.options.exclude.includes(api)) {
+          return;
+        }
         this.urls.push(url as URLWithMethod);
         map[url] = {
           ...path[method],

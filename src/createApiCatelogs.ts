@@ -15,25 +15,18 @@ const rimrafAync = PromiseA.promisify(require("rimraf"));
 const mkdirAsync = PromiseA.promisify(fs.mkdir);
 const cwd = process.cwd();
 
-const defualtOptions = {
-  output: {
-    path: path.join(cwd, "./dist"),
-  },
-};
-
 /**
  * 创建dto和api文件
  * @param {*} json
  */
-const createApiCatelogs = async (json: Swagger, options: Options) => {
+const createApiCatelogs = async (json: Swagger) => {
+  const options = SwaggerHelper.instance.options;
   const outputPath = options.output.path;
   // 清空dist目录
   // @ts-ignore
   await rimrafAync(outputPath);
   // 创建dist目录
   await mkdirAsync(outputPath);
-
-  options = Object.assign({}, defualtOptions, options);
 
   let paths = SwaggerHelper.instance.paths;
   const urls: URLWithMethod[] = SwaggerHelper.instance.urls;

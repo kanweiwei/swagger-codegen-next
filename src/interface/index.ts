@@ -96,4 +96,8 @@ export interface Options {
    *  获取模块名称
    */
   getModuleName: (path: string) => string;
+   /**
+   * 跳过的接口列表
+   */
+  exclude: string[];
 }

@@ -9,5 +9,5 @@ module.exports = async (json: Swagger, options: Options) => {
   SwaggerHelper.instance.init(json);
 
   // 创建api目录
-  createApiCatelogs(json, options);
+  createApiCatelogs(json);
 };
